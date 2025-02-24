@@ -114,10 +114,35 @@ ggsave(
   units = 'cm',
   scaling = 0.9,
   device = ragg::agg_png)
- 
+
+
+  g1 <- ggplot(time_count, aes(x = week)) +
+    geom_line(aes(y = intrafamily_violence, color = "Intrafamily violence"), size = 0.7) +  
+    geom_line(aes(y = avg_tmax * 30, color = "Mean Week Max. Temp."), size = 0.7) + # linetype="dashed"
+    scale_y_continuous(
+      name = "Number of cases",
+      sec.axis = sec_axis(~ . / 30, name = "Mean Week Max. Temp.", breaks=seq(0, 40, by=10)), 
+      limits = c(0, 1200, 40), 
+      breaks=seq(0, 1200, by=300)
+    ) +
+    scale_x_date(
+      date_breaks = "6 months",
+      date_labels = "%b %Y"
+    ) +
+    scale_color_manual(values = c("Intrafamily violence" = "gray60", "Mean Week Max. Temp." = "#d35400"), name=NULL) +
+    labs(y=NULL, x=NULL, title = "A.") +
+    theme_light() +
+    theme(panel.grid = element_blank(),
+          legend.position = "top",
+          title = element_text(size=11),
+          legend.text = element_text(size = 12), 
+          axis.text.x = element_text(angle = 45, vjust = 0.7, hjust=0.75, size = 12),
+          axis.text.y = element_text(size = 12))
+  
+
 g3 <- ggplot(crime_count, aes(x=tmax_group, y=intrafamily_violence, fill=tmax_group)) +
   geom_boxplot() + #fill='#A4A4A4', color="black"
-  labs(y="Number of cases", x="Max. Temp. Interval (celcius)") +
+  labs(y="Number of cases", x="Max. Temp. Interval (celcius)", title = "B.") +
   #scale_fill_gradient_d(low = "#FFD700", high = "#8B0000")  +
   #scale_fill_viridis_d(option = "magma", direction = -1) +
   scale_fill_manual(
@@ -125,7 +150,8 @@ g3 <- ggplot(crime_count, aes(x=tmax_group, y=intrafamily_violence, fill=tmax_gr
   ) +
   theme_light() +
   theme(panel.grid = element_blank(),
-          legend.position = "none")
+          legend.position = "none", 
+        axis.text = element_text(size = 12))
 
 g3
 
@@ -134,7 +160,7 @@ ggarrange(g1, g3, common.legend = TRUE)
 ggsave(
   filename = paste0("Output/Figures/TS_temp_crime.png"), 
   res = 300,
-  width = 25,
+  width = 30,
   height = 12,
   units = 'cm',
   scaling = 0.7,
@@ -144,7 +170,7 @@ ggsave(
 ## Crime and tmax by mun and year -----
 
 # Function create tables
-summary_table <- function(data, crime_var, group_var) {
+ summary_table <- function(data, crime_var, group_var) {
   data |> 
     group_by(across(all_of(group_var))) |> 
     summarise(
