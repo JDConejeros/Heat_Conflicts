@@ -50,4 +50,7 @@ rsconnect/
 
 # Folders
 Data/*
+Papers/*
 Code/results_VIF.R
+Code/trash_code.R
+*.docx

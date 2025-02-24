@@ -72,5 +72,16 @@ install_load(c("rio",
                "fixest", 
                "sandwich", 
                "lmtest", 
-               "modelsummary"
+               "modelsummary", 
+               "MASS", 
+               "rnaturalearth", 
+               "rnaturalearthdata",
+               "ggforce",
+               "ggspatial", 
+               "ggmapinset",
+               "gridExtra",
+               "ggrepel"
                ))
+
+# Extra 
+#devtools::install_github("ropensci/rnaturalearthhires")

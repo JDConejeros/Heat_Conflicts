@@ -226,10 +226,10 @@ detect_HW <- function(data){
       stop("Error: Una o más columnas especificadas no existen en los datos.")
     }
     
-    # Ordenar los datos por fecha para asegurar la secuencia
+    # Sort date data
     data <- data %>% arrange(.data[[date_col]])
     
-    # Calcular temperatura media ajustada (tad)
+    # Tad = (max_today - min_yesterday)/2
     data <- data %>%
       mutate(
         TAD = (get(tmax_col) + lead(get(tmin_col), default = NA)) / 2
@@ -239,7 +239,7 @@ detect_HW <- function(data){
     data <- data %>%
       group_by(com) %>%
       mutate(TAD_p95 = quantile(TAD, probs = 0.95, na.rm = TRUE)) %>%
-      ungroup() # Eliminar agrupamiento para cálculos posteriores
+      ungroup() 
     
     # Calcular EHIsigi, EHIaccli y EHF para `TAD` y `tmax`
     data <- data %>%

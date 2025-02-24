@@ -28,7 +28,7 @@ cr2 <- rio::import(paste0(data_out, cr2)) %>% janitor::clean_names() |> filter(y
 crime <- crime |> arrange(cod_mun, date_crime)
 
 vars_drop <- c("name_com", "lat", "long", "year_month", "year", "month", "day")
-cr2 <- cr2 |> select(!all_of(vars_drop))
+cr2 <- cr2 |> dplyr::select(!all_of(vars_drop))
 
 glimpse(crime)
 glimpse(cr2)
@@ -40,8 +40,11 @@ glimpse(cr2)
 crime <- crime |> 
   left_join(cr2, by=c("cod_mun"="com", "date_crime"="date"))
 
-
 crime <- crime |> drop_na()
+
+crime <- crime |> 
+  mutate(id_mun = str_pad(as.integer(factor(cod_mun)), width = 2, pad = "0")) |> 
+  relocate(id_mun, .before = cod_mun)
 
 glimpse(crime)
 summary(crime)
