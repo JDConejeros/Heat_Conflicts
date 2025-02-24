@@ -77,7 +77,7 @@ vars <- c("idevent3",
 
 data_crime <- rio::import(paste0(data_inp, "pre-001.dta")) |> 
   janitor::clean_names() |> 
-  select(all_of(vars))
+  dplyr::select(all_of(vars))
 
 glimpse(data_crime)
 
@@ -99,7 +99,7 @@ comunas <- chilemapas::codigos_territoriales |>
          codigo_provincia=as.numeric(codigo_provincia),
          codigo_region=as.numeric(codigo_region)) |> 
   filter(codigo_region==13) |> 
-  select(codigo_comuna, nombre_comuna, codigo_provincia, nombre_provincia)
+  dplyr::select(codigo_comuna, nombre_comuna, codigo_provincia, nombre_provincia)
 
 # Add district information 
 data_crime <- data_crime |> 
@@ -125,7 +125,7 @@ data_crime <- data_crime |>
   mutate(crime_6=factor(crime_6, 
                         levels=1:6, 
                         labels=c("Robbery", "Larceny", "Vehicle theft", "Burglary", "Injuries", "Intrafamily violence"))) |> 
-  select(idevent, cod_mun, name_mun, ifv, crime_6, #crime_20, 
+  dplyr::select(idevent, cod_mun, name_mun, ifv, crime_6, crime_20, 
          date_crime, year, month, day_month, day_week, weekends, 
          point_x, point_y)
 
@@ -154,7 +154,7 @@ save(geom_dis, file=paste0(data_out, "mun_geometry", ".RData"))
 geom_zones <- st_read(paste0(data_inp, "microdatos_manzana/", "Microdatos_Manzana.shp")) |> 
   janitor::clean_names() |> 
   filter(region=="REGIÓN METROPOLITANA DE SANTIAGO") |> 
-  select(cut, zona_censa, manzana, 
+  dplyr::select(cut, zona_censa, manzana, 
     total_pers, total_homb, total_muje, geometry) |> 
   mutate(
     total_homb=as.numeric(total_homb), 
@@ -168,3 +168,55 @@ glimpse(geom_zones)
 geom_zones <- st_as_sf(geom_zones)
 
 save(geom_zones, file=paste0(data_out, "zc_geometry", ".RData"))
+
+# Add table with crimes 
+
+glimpse(data_crime)
+
+tab_crime <- data_crime |> 
+  group_by(crime_6, crime_20) |> 
+  summarise(n = n()) |> 
+  ungroup() |> 
+  group_by(crime_6) |> 
+  mutate(porc = n/base::sum(n)) |> 
+  ungroup()
+
+tab_crime <- tab_crime |> 
+  mutate(crime_20 = factor(crime_20,
+  levels = c(1:34),
+  labels = c("Robbery with violence or intimidation",
+             "Pickpocketing",
+             "Motor vehicle theft",
+             "Theft of objects from vehicle",
+             "Burglary (inhabited place)",
+             "Burglary (uninhabited place)",
+             "Other forceful thefts",
+             "Cattle rustling",
+             "Larceny",
+             "Serious or severe injuries",
+             "Minor injuries",
+             "Homicides",
+             "Rape",
+             "Sexual abuse",
+             "Other sexual offenses",
+             "IPV against women",
+             "IPV against men",
+             "IPV against children",
+             "IPV against elderly",
+             "Unclassified IPV",
+             "Economic crimes",
+             "Drug-related offenses",
+             "Kidnapping",
+             "Illegal possession of firearms",
+             "Threats",
+             "Receiving stolen goods",
+             "Vandalism",
+             "Attempted robbery",
+             "Deaths and discoveries",
+             "Suicide",
+             "Arrest warrants",
+             "Illegal firearm possession",
+             "Attacks",
+             "Traffic offenses")))
+
+writexl::write_xlsx(tab_crime, "Output/Tables/Tab_crime.xlsx")
