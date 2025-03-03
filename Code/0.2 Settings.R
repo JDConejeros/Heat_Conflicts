@@ -80,7 +80,8 @@ install_load(c("rio",
                "ggspatial", 
                "ggmapinset",
                "gridExtra",
-               "ggrepel"
+               "ggrepel",
+               "survey"
                ))
 
 # Extra 
